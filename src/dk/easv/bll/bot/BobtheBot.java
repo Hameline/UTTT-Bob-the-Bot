@@ -1,6 +1,7 @@
 package dk.easv.bll.bot;
 
 import dk.easv.bll.field.IField;
+import dk.easv.bll.game.GameState;
 import dk.easv.bll.game.IGameState;
 import dk.easv.bll.move.IMove;
 import dk.easv.bll.move.Move;
@@ -8,6 +9,7 @@ import dk.easv.bll.move.Move;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class BobtheBot implements IBot{
 
@@ -17,53 +19,52 @@ public class BobtheBot implements IBot{
     @Override
     public IMove doMove(IGameState state) {
         List<IMove> winMoves = getWinningMoves(state);
-        List<IMove> normalMoves = normalMove(state);
 
         if(!winMoves.isEmpty())
-            return winMoves.get(0);
+            return winMoves.getFirst();
         if(winMoves.isEmpty()) {
             List<IMove> prefMove = new ArrayList<>();
-            for (int[] move : prefferedMoves)
-            {
-                if(state.getField().getMacroboard()[move[0]][move[1]].equals(IField.AVAILABLE_FIELD))
-                {
+            for (int[] move : prefferedMoves) {
+
+                if(state.getField().getMacroboard()[move[0]][move[1]].equals(IField.AVAILABLE_FIELD)) {
+
                     //find move to play
-                    for (int[] selectedMove : prefferedMoves)
-                    {
+                    for (int[] selectedMove : prefferedMoves) {
+
                         int x = move[0]*3 + selectedMove[0];
                         int y = move[1]*3 + selectedMove[1];
-                        if(state.getField().getBoard()[x][y].equals(IField.EMPTY_FIELD))
-                        {
-                            return new Move(x,y);
+                        if(state.getField().getBoard()[x][y].equals(IField.EMPTY_FIELD)) {
+                            Move newMove = new Move(x,y);
+                            prefMove.add(newMove);
                         }
                     }
                 }
+            }
+            if (!prefMove.isEmpty()) {
+                Random random = new Random();
+                int randomIndex = random.nextInt(prefMove.size());
+                return prefMove.get(randomIndex);
+            }
+            if (prefMove.isEmpty()) {
+                return state.getField().getAvailableMoves().get(0);
             }
         }
 
         return doMove(state);
     }
 
+
     @Override
     public String getBotName() {
         return BOT_NAME;
     }
-
-    private List<IMove> normalMove(IGameState state) {
-        List<IMove> normalMove = new ArrayList<>();
-        return normalMove;
-    }
     private int[][] prefferedMoves = {
                 {0, 0}, {2, 2}, {0, 2}, {2, 0},  //Corners ordered across
-                {0, 1}, {2, 1}, {1, 0}, {1, 2}, //Outer Middles ordered across
-                {1, 1}
     };
 
+    private IMove checkWinningCondition(IGameState state) {
 
-    private boolean isYouLooseMate(IGameState state, IMove move, String enemyPlayer) {
-
-
-        return false;
+        return null;
     }
 
     private boolean isWinningMove(IGameState state, IMove move, String player){
